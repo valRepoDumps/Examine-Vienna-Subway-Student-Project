@@ -3,6 +3,8 @@ import matplotlib.pyplot as plt
 import json
 from pyvis.network import Network
 maxStations = 100
+fileLocation = "subway_graph.json"
+
 
 def load_graph(in_path):
     """Load graph from JSON node-link format."""
@@ -55,8 +57,8 @@ def preCalcRouteFloydWarshall(G):
 
     return (matrix, routes)
 
-# Usage
-G = load_graph("GTFS/subway_graph.json")
+# Usage, change
+G = load_graph(fileLocation)
 matrix, routes = preCalcRouteFloydWarshall(G)
 
 def draw_graph():

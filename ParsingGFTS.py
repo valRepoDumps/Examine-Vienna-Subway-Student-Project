@@ -6,6 +6,9 @@ from datetime import datetime
 import networkx as nx
 import matplotlib.pyplot as plt
 
+filePath = "gtfs_path.zip"
+
+
 def time_to_seconds(t):
     """Convert HH:MM:SS to seconds (handles times > 24h in GTFS)."""
     h, m, s = map(int, t.strip().split(':'))
@@ -116,7 +119,7 @@ def export_graph(G, out_path):
     print(f"Saved: {out_path}  ({G.number_of_nodes()} nodes, {G.number_of_edges()} edges)")
 
 if __name__ == '__main__':
-    G = gtfs_to_graph('gtfs_path.zip', route_types={1})  # 1 = subway
+    G = gtfs_to_graph(filePath, route_types={1})  # 1 = subway
 
     # Basic stats
     print(f"Stations : {G.number_of_nodes()}")
