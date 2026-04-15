@@ -5,6 +5,11 @@ from pyvis.network import Network
 maxStations = 100
 fileLocation = "subway_graph.json"
 
+###
+### drop edge u v -> bo edge (u,v)
+### find route u v -> tim quang duong di ngan nhat giua u, v
+### find dist u v -> tim khoang cach ngan nhat giua u, v. 
+
 
 def load_graph(in_path):
     """Load graph from JSON node-link format."""
