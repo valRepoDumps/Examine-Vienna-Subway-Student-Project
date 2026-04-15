@@ -116,7 +116,7 @@ def export_graph(G, out_path):
     print(f"Saved: {out_path}  ({G.number_of_nodes()} nodes, {G.number_of_edges()} edges)")
 
 if __name__ == '__main__':
-    G = gtfs_to_graph('GTFS/gtfs_path.zip', route_types={1})  # 1 = subway
+    G = gtfs_to_graph('gtfs_path.zip', route_types={1})  # 1 = subway
 
     # Basic stats
     print(f"Stations : {G.number_of_nodes()}")
@@ -125,5 +125,5 @@ if __name__ == '__main__':
     nx.draw_planar(G, with_labels=True, node_size = 5, font_size=5)
     plt.show()
 
-    export_graph(G, 'GTFS/subway_graph.json')
+    export_graph(G, 'subway_graph.json')
 
