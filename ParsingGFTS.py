@@ -87,10 +87,9 @@ def gtfs_to_graph(gtfs_folder, route_types={1}):
     allIds = dict(zip(subway_stops['stop_id'], subway_stops['stop_name'])) #make a dict of stop_id:stop_name
 
     #building graph.
-    G = nx.DiGraph()
+    G = nx.Graph()
 
     # Add nodes
-
     name_to_int = {name: i for i, name in enumerate(sorted(allStops))} 
     for name, int_id in name_to_int.items():
         G.add_node(int_id, stop_name = name)
@@ -108,6 +107,7 @@ def gtfs_to_graph(gtfs_folder, route_types={1}):
         else:
             G.add_weighted_edges_from([(u,v,w)])
 
+
     return G
 
 
@@ -124,9 +124,9 @@ if __name__ == '__main__':
     # Basic stats
     print(f"Stations : {G.number_of_nodes()}")
     print(f"Edges    : {G.number_of_edges()}")
-
     nx.draw_planar(G, with_labels=True, node_size = 5, font_size=5)
     plt.show()
-
+    c = nx.shortest_path_length(G, source=52, target=69, weight='weight')
+    print(c)
     export_graph(G, 'subway_graph.json')
 

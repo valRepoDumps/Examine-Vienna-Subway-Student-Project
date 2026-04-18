@@ -21,17 +21,18 @@ def load_graph(in_path):
 
 def preCalcRouteFloydWarshall(G):
     def nodeToInt(node):
-        return node
+        return int(node)
     
     totalNodes = G.number_of_nodes()
     matrix = [[float('inf')] * maxStations for _ in range(maxStations)]
 
     routes = [[None] * maxStations for _ in range(maxStations)]
-    # #setting up
+    #setting up
     for node1 in G.nodes():
         for node2 in G.nodes():
             node1id = nodeToInt(node1)
             node2id = nodeToInt(node2)
+
 
             if (node1 == node2):
                 matrix[node1id][node2id] = 0
@@ -64,6 +65,7 @@ def preCalcRouteFloydWarshall(G):
 
 # Usage, change
 G = load_graph(fileLocation)
+
 matrix, routes = preCalcRouteFloydWarshall(G)
 
 def draw_graph():
@@ -76,13 +78,20 @@ def draw_graph():
     plt.show()
 
 def draw_graph2():
-    g = Network(height="1500px", width="100%", bgcolor="#222222", font_color= "white")
-    g.from_nx(G)
+    # Create a deep copy so we don't mess up the original G
+    visual_G = G.copy() 
+    
+    g = Network(height="1500px", width="100%", bgcolor="#222222", font_color="white")
+    g.from_nx(visual_G)
+    
     for e in g.edges:
-        e['width'] /= 10
+        # Check if width exists to avoid KeyError, then modify
+        if 'width' in e:
+            e['width'] /= 10
     
     for n in g.nodes:
-        n['label'] = n['stop_name'] + "(" + str(n['id']) +")"
+        # Use the copied node data
+        n['label'] = f"{n.get('stop_name', 'Unknown')} ({n['id']})"
 
     g.save_graph("test.html")
 
@@ -90,47 +99,59 @@ def getNodeNamesAndIds():
     for node_id, data in G.nodes(data=True):
         print(f"[{node_id}] {data['stop_name']} ")
 
+def getNodeEdges():
+    for u, v, data in G.edges(data=True):
+        print(f"{u} ({G.nodes[u]['stop_name']}) -> {v} ({G.nodes[v]['stop_name']}): {data}")
+
+
 def parseCmd(cmd):
     """Parse command for dropping edges. Format: 'drop edge A B'"""
     global matrix, routes
     parts = cmd.strip().split()
     if len(parts) == 0: return
 
-    try:
-        if parts[0] == 'drop' and len(parts) >= 2:
+    # try:
+    if parts[0] == 'drop' and len(parts) >= 2:
 
-            if parts[1] == 'edge' and len(parts) >= 4:
+        if parts[1] == 'edge' and len(parts) >= 4:
 
-                u, v = int(parts[2]), int(parts[3])
-                if G.has_edge(u, v):
-                    G.remove_edge(u, v)
-                    print(f"Removed edge: {u} -> {v}")
-                    matrix, routes = preCalcRouteFloydWarshall(G)
-                else:
-                    print(f"Edge {u} -> {v} not found")
-            elif parts[1] == 'node' and len(parts) >= 3:
-
-                node = int(parts[2])
-                G.remove_node(node)
+            u, v = int(parts[2]), int(parts[3])
+            if G.has_edge(u, v):
+                G.remove_edge(u, v)
+                print(f"Removed edge: {u} -> {v}")
                 matrix, routes = preCalcRouteFloydWarshall(G)
             else:
-                print(f"Unknown command: {cmd}")
-            
-        elif parts[0] == 'find' and len(parts) >= 4:
-            if parts[1] == 'route':
-                u, v = int(parts[2]), int(parts[3])
-                print(routes[u][v])
-            elif parts[1] == 'dist':
-                u, v = int(parts[2]), int(parts[3])
-                print(matrix[u][v])
-                dist = nx.shortest_path_length(G, source=u, target=v, weight='weight')
-                print("True dist: " + str(dist))
-            else:
-                print(f"Unknown command: {cmd}")
+                print(f"Edge {u} -> {v} not found")
+        elif parts[1] == 'node' and len(parts) >= 3:
+
+            node = int(parts[2])
+            G.remove_node(node)
+            matrix, routes = preCalcRouteFloydWarshall(G)
         else:
             print(f"Unknown command: {cmd}")
-    except Exception as e:
+        
+    elif parts[0] == 'find' and len(parts) >= 4:
+        if parts[1] == 'route':
+            u, v = int(parts[2]), int(parts[3])
+            print(routes[u][v])
+        elif parts[1] == 'dist':
+            u, v = int(parts[2]), int(parts[3])
+            print(matrix[u][v])
+
+            # use to test. 
+            # try:
+            #     # Use 'travel_time_sec' instead of 'weight'
+            #     dist = nx.shortest_path_length(G, source=u, target=v, weight='travel_time_sec')
+            #     print(f"True dist: {dist}")
+            # except nx.NetworkXNoPath:
+            #     print("No path exists between these stations.")
+        else:
+            print(f"Unknown command: {cmd}")
+    else:
         print(f"Unknown command: {cmd}")
+    # except:
+    #     print(f"Unknown command: {cmd}")
+    
 
 def test():
     for node1 in G.nodes():
@@ -141,7 +162,7 @@ def test():
                 return
             
     print("TEST SUCCEED!")
-            
+
 draw_graph2()
 cmd = input("Get cmd: ")
 while (cmd != '#'):
