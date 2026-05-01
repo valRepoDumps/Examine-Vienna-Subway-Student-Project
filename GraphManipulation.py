@@ -69,12 +69,32 @@ G = load_graph(fileLocation)
 matrix, routes = preCalcRouteFloydWarshall(G)
 
 def draw_graph():
-    labels = nx.get_node_attributes(G, 'stop_name')  # {int_id: 'Station Name', ...}
+
+    plt.figure(figsize=(11, 8))
+    pos = nx.kamada_kawai_layout(G)
+    nx.draw_networkx_edges(G, pos, width=1.2, edge_color='silver', alpha=0.5)
     
-    pos = nx.planar_layout(G)
-    nx.draw(G, pos, labels=labels, with_labels=True, 
-            node_size=5, node_color='lightblue', font_size=8)
+    nx.draw_networkx_nodes(G, pos, 
+                           node_size=100, 
+                           node_color='#0072bc', 
+                           edgecolors='white', 
+                           linewidths=1)
+    nx.draw_networkx_labels(G, pos, 
+                            font_size=5, 
+                            font_color='black', 
+                            font_weight='bold')
     
+    node_labels = nx.get_node_attributes(G, 'stop_name')
+    label_pos = {k: (v[0] + 0.015, v[1] - 0.015) for k, v in pos.items()}
+    
+    nx.draw_networkx_labels(G, label_pos, 
+                            labels=node_labels,
+                            font_size=6, 
+                            font_family='sans-serif',
+                            font_weight='bold')
+
+    plt.axis('off') 
+    plt.tight_layout()
     plt.show()
 
 def draw_graph2():
