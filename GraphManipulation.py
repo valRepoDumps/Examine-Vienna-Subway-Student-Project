@@ -110,14 +110,56 @@ def build_folium_map(graph_json_str, start_node=None, end_node=None, route_nodes
         if lat is None: continue
         name = names.get(station, str(station))
 
-        if station == start_node:
-            color, fill_color, radius, label = "#27ae60", "#2ecc71", 18, f"🟢 START: {name}"
-        elif station == end_node:
-            color, fill_color, radius, label = "#c0392b", "#e74c3c", 18, f"🔴 END: {name}"
-        elif station in route_set:
-            color, fill_color, radius, label = "#e67e22", "#f39c12", 14, f"🔶 {name}"
-        else:
-            color, fill_color, radius, label = "#2980b9", "#3498db", 12, name
+def draw_graph():
+
+    plt.figure(figsize=(11, 8))
+    pos = nx.kamada_kawai_layout(G)
+    nx.draw_networkx_edges(G, pos, width=1.2, edge_color='silver', alpha=0.5)
+    
+    nx.draw_networkx_nodes(G, pos, 
+                           node_size=100, 
+                           node_color='#0072bc', 
+                           edgecolors='white', 
+                           linewidths=1)
+    nx.draw_networkx_labels(G, pos, 
+                            font_size=5, 
+                            font_color='black', 
+                            font_weight='bold')
+    
+    node_labels = nx.get_node_attributes(G, 'stop_name')
+    label_pos = {k: (v[0] + 0.015, v[1] - 0.015) for k, v in pos.items()}
+    
+    nx.draw_networkx_labels(G, label_pos, 
+                            labels=node_labels,
+                            font_size=6, 
+                            font_family='sans-serif',
+                            font_weight='bold')
+
+    plt.axis('off') 
+    plt.tight_layout()
+    plt.show()
+
+def draw_graph2():
+    # Create a deep copy so we don't mess up the original G
+    visual_G = G.copy() 
+    
+    g = Network(height="1500px", width="100%", bgcolor="#222222", font_color="white")
+    g.from_nx(visual_G)
+    
+    for e in g.edges:
+        # Check if width exists to avoid KeyError, then modify
+        if 'width' in e:
+            e['width'] /= 10
+    
+    for n in g.nodes:
+        # Use the copied node data
+        n['label'] = f"{n.get('stop_name', 'Unknown')} ({n['id']})"
+
+    g.save_graph("test.html")
+
+def getNodeNamesAndIds():
+    for node_id, data in G.nodes(data=True):
+        print(f"[{node_id}] {data['stop_name']} ")
 
         folium.CircleMarker(
             location=[lat, lon],

@@ -233,17 +233,48 @@ def export_graph(G, out_path):
     print(f"Saved: {out_path}  ({G.number_of_nodes()} nodes, {G.number_of_edges()} edges)")
 
 if __name__ == '__main__':
-    G = gtfs_to_graph(filePath, route_types={1})  # 1 = subway
+    G = gtfs_to_graph(filePath, route_types={1}) #subway
 
-    # Basic stats
     print(f"Stations : {G.number_of_nodes()}")
     print(f"Edges    : {G.number_of_edges()}")
+    #display all edges 
+    print("\n" + "="*80)
+    print(f"{'No.':<5} | {'Origin Station':<30} | {'Destination Station':<30} | {'Weight':<10}")
+    print("-" * 80)
+
+    for i, (u, v, data) in enumerate(G.edges(data=True), 1):
+        name_u = G.nodes[u]['stop_name'] 
+        name_v = G.nodes[v]['stop_name'] 
+        weight = data['weight']          
+        
+        print(f"{i:<5} | {name_u:<30} | {name_v:<30} | {weight:<5} sec")
     
-    # Draw graph with line colors mapped dynamically
-    edge_colors = [G[u][v].get('color', '#7f8c8d') for u, v in G.edges()]
-    nx.draw_planar(G, with_labels=True, node_size=5, font_size=5, edge_color=edge_colors)
+    print("="*80 + "\n")
+
+    plt.figure(figsize=(11, 8))
+    pos = nx.kamada_kawai_layout(G)
+    
+    nx.draw_networkx_edges(G, pos, width=1.2, edge_color='silver', alpha=0.5)
+    nx.draw_networkx_nodes(G, pos, 
+                           node_size=100, 
+                           node_color='#0072bc', 
+                           edgecolors='white', 
+                           linewidths=1)
+    nx.draw_networkx_labels(G, pos, 
+                            font_size=5, 
+                            font_color='black', 
+                            font_weight='bold')
+    
+    node_labels = nx.get_node_attributes(G, 'stop_name')
+
+    nx.draw_networkx_labels(G, {k: (v[0] + 0.015, v[1] - 0.015) for k, v in pos.items()}, 
+                            labels=node_labels,
+                            font_size=6, 
+                            font_family='sans-serif',
+                            font_weight='bold')
+
+    plt.axis('off') 
+    plt.tight_layout()
     plt.show()
-    
-    c = nx.shortest_path_length(G, source=52, target=69, weight='weight')
-    print(f"Shortest travel time example: {c} seconds")
-    export_graph(G, 'Examine-Vienna-Subway-Student-Project/subway_graph.json')
+
+    export_graph(G, 'subway_graph.json')
